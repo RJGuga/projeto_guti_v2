@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ sala.nome_sala }} – Apostas realizadas – QAQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .radio-time { display:flex; gap:16px; margin:20px 0; }
+        .radio-time label {
+            flex:1; display:flex; align-items:center; justify-content:center;
+            gap:10px; padding:16px; border:2px solid #ddd; border-radius:10px;
+            cursor:pointer; font-weight:700; font-size:1rem; transition:all 0.2s;
+        }
+        .radio-time input[type=radio] { margin-right: 6px; }
+        .radio-time label:has(input:checked) { border-color:var(--ouro); background:rgba(255,215,0,0.12); }
+    </style>
+</head>
+<body>
+
+<nav class="qaq-navbar">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <span class="welcome">Olá, {{ nome_criador }}!</span>
+        <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
+        <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
+        <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+    </div>
+</nav>
+
+<div class="page-wrapper">
+    <h1 class="page-title">📊 {{ sala.nome_sala }} — Apostas encerradas</h1>
+
+    <div class="grid-2" style="gap:28px; align-items:start;">
+
+        <!-- Painel de resultados -->
+        <div class="qaq-card">
+            <h2 class="card-title">🏆 Declarar vencedor</h2>
+
+            <!-- Placar de apostas -->
+            <div class="grid-3" style="margin-bottom:24px;">
+                <div class="stat-box">
+                    <div class="stat-num">{{ quantidade_apostas }}</div>
+                    <div class="stat-label">Total de apostas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">{{ apostas_time1 }}</div>
+                    <div class="stat-label">{{ sala.time1 }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">{{ apostas_time2 }}</div>
+                    <div class="stat-label">{{ sala.time2 }}</div>
+                </div>
+            </div>
+
+            <p style="font-weight:600; margin-bottom:12px; color:#333;">Selecione o time vencedor:</p>
+
+            <form action="{{ url_for('salas.resultado', id_sala=sala.id) }}" method="POST">
+                <div class="radio-time">
+                    <label>
+                        <input type="radio" name="time-selection" value="{{ sala.time1 }}" required>
+                        {{ sala.time1 }}
+                    </label>
+                    <label>
+                        <input type="radio" name="time-selection" value="{{ sala.time2 }}" required>
+                        {{ sala.time2 }}
+                    </label>
+                </div>
+                <button type="submit" class="btn-qaq solid" style="width:100%; padding:12px; font-size:1rem;">
+                    🏁 Finalizar sala e ver resultado
+                </button>
+            </form>
+        </div>
+
+        <!-- Chat da sala -->
+        <div class="chat-box">
+            <div class="chat-header">💬 Chat da sala</div>
+            <div id="message-container">
+                <div id="chat-messages"></div>
+            </div>
+            <form id="chat-form" class="chat-footer">
+                <input type="hidden" id="sala-id" value="{{ sala.id }}">
+                <input type="text" id="message-input" placeholder="Digite uma mensagem...">
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    function updateChat() {
+        $.get('/get_messages_por_sala', { id_sala: $('#sala-id').val() }, function(data) {
+            var html = data.map(function(m) {
+                return '<p><strong>' + $('<span>').text(m.username).html() + ':</strong> ' + $('<span>').text(m.message).html() + '</p>';
+            }).join('');
+            $('#chat-messages').html(html);
+            var c = document.getElementById('message-container');
+            c.scrollTop = c.scrollHeight;
+        });
+    }
+    updateChat();
+    setInterval(updateChat, 5000);
+
+    $('#chat-form').submit(function(e) {
+        e.preventDefault();
+        var msg = $('#message-input').val().trim();
+        if (!msg) return;
+        $.post('/send_message_por_sala', { message: msg, id_sala: $('#sala-id').val() }, function() {
+            $('#message-input').val('');
+            updateChat();
+        });
+    });
+});
+</script>
+</body>
+</html>

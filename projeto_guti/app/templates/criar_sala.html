@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Sala – QAQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="qaq-navbar">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <span class="welcome">Olá, {{ nome_criador }}!</span>
+        <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
+        <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
+        <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+    </div>
+</nav>
+
+<div class="page-wrapper" style="max-width:540px;">
+    <h1 class="page-title">🏟️ Criar nova sala</h1>
+
+    <div class="qaq-card">
+        <form action="/sala" method="POST" class="qaq-form">
+
+            <label for="nome_sala">Nome da sala</label>
+            <input type="text" id="nome_sala" name="nome_sala" placeholder="Ex: Clássico do Sábado" required>
+
+            <label for="valor">Valor da aposta (R$)</label>
+            <input type="number" id="valor" name="valor" placeholder="Ex: 50" min="1" required>
+
+            <label>Times</label>
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">
+                <input type="text" id="time1" name="time1" placeholder="Time 1" required style="margin-bottom:0;">
+                <span style="font-weight:900; font-size:1.2rem; color:#08480C;">X</span>
+                <input type="text" id="time2" name="time2" placeholder="Time 2" required style="margin-bottom:0;">
+            </div>
+
+            <input type="submit" value="🚀 Criar Sala">
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
