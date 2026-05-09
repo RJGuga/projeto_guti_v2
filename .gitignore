@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# Banco de dados (não versionar dados de produção)
+*.db
+*.sqlite3
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ngrok
+ngrok-v3-stable-windows-amd64/
+ngrok-v3-stable-windows-amd64.zip
+
+# Logs
+*.log
