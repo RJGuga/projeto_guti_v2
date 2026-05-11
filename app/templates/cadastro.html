@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -16,14 +16,13 @@
     <div class="qaq-card" style="width:100%; max-width:460px;">
         <h2 style="text-align:center; color:#08480C; margin-bottom:24px;">📝 Criar conta</h2>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                <div class="flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endwith %}
+        {{% with messages = get_flashed_messages(with_categories=true) %}}
+            {{% for category, message in messages %}}
+                <div class="flash-{{{{ category }}}}">{{{{ message }}}}</div>
+            {{% endfor %}}
+        {{% endwith %}}
 
-        <form action="{{ url_for('auth.cadastro', next=next) }}" method="post" class="qaq-form" onsubmit="return validarSenha();">
-            <input type="hidden" name="next" value="{{ next }}">
+        <form action="{{ url_for('auth.cadastro') }}" method="post" class="qaq-form" onsubmit="return validarSenha();">
             <label for="nome">Nome completo</label>
             <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
 
@@ -39,20 +38,20 @@
             <input type="submit" value="Criar conta">
         </form>
         <p style="text-align:center; margin-top:16px; font-size:0.88rem; color:#666;">
-            Já tem conta? <a href="{{ url_for('auth.login', next=next) }}" class="qaq-link">Fazer login</a>
+            Já tem conta? <a href="{{ url_for('auth.login') }}" class="qaq-link">Fazer login</a>
         </p>
     </div>
 
 <script>
-function validarSenha() {
+function validarSenha() {{
     var s = document.getElementById('senha').value;
     var c = document.getElementById('confirmar_senha').value;
-    if (s !== c) {
-        Swal.fire({ icon:'error', title:'Senhas não conferem', text:'A senha e a confirmação devem ser iguais.' });
+    if (s !== c) {{
+        Swal.fire({{ icon:'error', title:'Senhas não conferem', text:'A senha e a confirmação devem ser iguais.' }});
         return false;
-    }
+    }}
     return true;
-}
+}}
 </script>
 </body>
 </html>
