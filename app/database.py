@@ -31,6 +31,7 @@ def create_tables():
             encerrada INTEGER DEFAULT 0,
             paga INTEGER DEFAULT 0,
             vencedor TEXT DEFAULT NULL,
+            publica INTEGER DEFAULT 0,
             FOREIGN KEY (id_criador) REFERENCES usuarios (id)
         )
     ''')
@@ -68,6 +69,7 @@ def create_tables():
     for ddl in [
         'ALTER TABLE salas ADD COLUMN paga INTEGER DEFAULT 0',
         'ALTER TABLE salas ADD COLUMN vencedor TEXT DEFAULT NULL',
+        'ALTER TABLE salas ADD COLUMN publica INTEGER DEFAULT 0',
     ]:
         try:
             cursor.execute(ddl)
@@ -110,17 +112,30 @@ def verificar_senha(hash_senha, senha_plain):
 
 # ── Salas ─────────────────────────────────────────────────────────────────────
 
-def insert_sala(nome_sala, time1, time2, valor, id_criador):
+def insert_sala(nome_sala, time1, time2, valor, id_criador, publica=0):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'INSERT INTO salas (nome_sala, time1, time2, valor, id_criador) VALUES (?, ?, ?, ?, ?)',
-        (nome_sala, time1, time2, valor, id_criador)
+        'INSERT INTO salas (nome_sala, time1, time2, valor, id_criador, publica) VALUES (?, ?, ?, ?, ?, ?)',
+        (nome_sala, time1, time2, valor, id_criador, publica)
     )
     conn.commit()
     id_sala = cursor.lastrowid
     conn.close()
     return id_sala
+
+
+def get_salas_publicas():
+    conn = get_db_connection()
+    rows = conn.execute('''
+        SELECT s.*, u.nome AS nome_criador
+        FROM salas s
+        INNER JOIN usuarios u ON s.id_criador = u.id
+        WHERE s.publica = 1 AND s.encerrada = 0
+        ORDER BY s.id DESC
+    ''').fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
 
 
 def get_sala_por_id(id_sala):

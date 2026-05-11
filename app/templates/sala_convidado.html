@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -75,7 +75,15 @@
             <div class="qaq-card">
                 <h2 class="card-title">⚽ Faça sua aposta</h2>
                 <p style="color:#666; font-size:0.9rem; margin-bottom:8px;">Criador: <b>{{ nome_criador }}</b></p>
-                <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">Valor: <b>R$ {{ valor_sala }}</b></p>
+                <p style="color:#666; font-size:0.9rem; margin-bottom:8px;">Valor: <b>R$ {{ valor_sala }}</b></p>
+                <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">
+                    Visibilidade:
+                    {% if sala.publica %}
+                        <b>🌐 Pública</b>
+                    {% else %}
+                        <b>🔒 Privada</b>
+                    {% endif %}
+                </p>
 
                 <div id="radio-group">
                     <p style="font-weight:600; margin-bottom:12px;">Escolha o time vencedor:</p>

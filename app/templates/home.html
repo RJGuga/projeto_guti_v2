@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -54,81 +54,112 @@
 
 <!-- MAIN CONTENT -->
 <div class="page-wrapper">
-    <div class="grid-2" style="gap:30px; align-items: start;">
 
-        <!-- COLUNA ESQUERDA: info -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div class="qaq-card">
-                <h2 class="card-title">🤔 O que é o QAQ?</h2>
-                <p style="color:#444; line-height:1.7; font-size:0.95rem;">
-                    <b><i>Quer Apostar Quanto</i></b> não é um site de apostas esportivas.<br>
-                    Somos uma plataforma cheia de fãs apaixonados e competitivos — amamos cada emoção de cada jogo,
-                    os gritos de vitória e o prazer de zoar os fãs rivais.<br><br>
-                    Aqui você junta os amigos, acompanha os jogos e lança seus desafios —
-                    do mesmo jeito que faria naquele churras em dia de clássico.<br><br>
-                    A diferença é que no <b><i>QAQ</i></b>, a caixa de breja não fica só na promessa. 🍺
-                </p>
-            </div>
+    <!-- LINHA 1: O que é o QAQ + Chat -->
+    <div class="grid-2" style="gap:30px; align-items:start; margin-bottom:30px;">
 
-            <div class="qaq-card">
-                <h2 class="card-title">📋 Como jogar?</h2>
-
-                <h3 style="color:#08480C; font-size:1rem; margin-bottom:12px;">👑 Administrador</h3>
-                <p style="color:#444; line-height:1.8; font-size:0.9rem;">
-                    <b>Etapa 1: Criando a sala de apostas</b><br>
-                    Crie uma sala de apostas e dê um nome a ela.<br>
-                    Ao criar a sala você se torna um administrador e com isso, você terá direito a receber uma porcentagem
-                    do valor das apostas que criar. Quanto mais apostas você criar, mais você irá lucrar!<br>
-                    As salas são privadas e só entra quem for convidado.<br>
-                    O ADM é o responsável por atualizar o placar em tempo real.<br>
-                    <br>
-                    <b>Etapa 2: Link de convidado</b><br>
-                    Nesta etapa, você receberá um link de convidado para enviar para todas as pessoas que você conhece e que
-                    gostariam de fazer uma fezinha.<br>
-                    Você pode criar sua aposta no valor que quiser a partir de 10 reais.<br>
-                    <br>
-                    <b>Etapa 3: Cadastro</b><br>
-                    Aqui o seu convidado faz o cadastro dele e entra na sua sala para participar da aposta.<br>
-                    Logo após, os convidados farão o pagamento das apostas via código PIX.<br>
-                    <br>
-                    <b>Etapa 4: Pagamento</b><br>
-                    Após o pagamento, seu convidado já estará participando da aposta criada por você.<br>
-                    <br>
-                    <b>Etapa 5: Recebimento</b><br>
-                    Ao finalizar o jogo ou a brincadeira, seus convidados receberão o valor devido pelas apostas.
-                </p>
-
-                <h3 style="color:#08480C; font-size:1rem; margin: 20px 0 12px;">⚽ Apostador</h3>
-                <p style="color:#444; line-height:1.8; font-size:0.9rem;">
-                    <b>Etapa 1: Convite</b><br>
-                    Receba um link de convite enviado pelo administrador.<br>
-                    <br>
-                    <b>Etapa 2: Cadastro</b><br>
-                    Faça o cadastro e entre na sala.<br>
-                    <br>
-                    <b>Etapa 3: Aposta</b><br>
-                    Faça a aposta no valor que quiser a partir de 10 reais.<br>
-                    <br>
-                    <b>Etapa 4: Pagamento</b><br>
-                    Efetue o pagamento da aposta via código PIX.<br>
-                    <br>
-                    <b>Etapa 5: Recebimento</b><br>
-                    Ao finalizar o jogo ou a brincadeira, você receberá o valor devido pela aposta.
-                </p>
-            </div>
+        <div class="qaq-card">
+            <h2 class="card-title">🤔 O que é o QAQ?</h2>
+            <p style="color:#444; line-height:1.7; font-size:0.95rem;">
+                <b><i>Quer Apostar Quanto</i></b> não é um site de apostas esportivas.<br>
+                Somos uma plataforma cheia de fãs apaixonados e competitivos — amamos cada emoção de cada jogo,
+                os gritos de vitória e o prazer de zoar os fãs rivais.<br><br>
+                Aqui você junta os amigos, acompanha os jogos e lança seus desafios —
+                do mesmo jeito que faria naquele churras em dia de clássico.<br><br>
+                A diferença é que no <b><i>QAQ</i></b>, a caixa de breja não fica só na promessa. 🍺
+            </p>
         </div>
 
-        <!-- COLUNA DIREITA: chat -->
         <div class="chat-box">
             <div class="chat-header">💬 Bate-papo ao vivo</div>
             <div id="message-container">
                 <div id="chat-messages"></div>
             </div>
             <form id="chat-form" class="chat-footer">
-                <input type="text" id="message-input" placeholder="{% if nome_usuario %}Digite uma mensagem...{% else %}Fa��a login para conversar{% endif %}"
+                <input type="text" id="message-input" placeholder="{% if nome_usuario %}Digite uma mensagem...{% else %}Faça login para conversar{% endif %}"
                     {% if not nome_usuario %}disabled{% endif %}>
                 <button type="submit" {% if not nome_usuario %}disabled{% endif %}>Enviar</button>
             </form>
+        </div>
+
+    </div>
+
+    <!-- LINHA 2: Como jogar + Salas públicas -->
+    <div class="grid-2" style="gap:30px; align-items:start;">
+
+        <div class="qaq-card">
+            <h2 class="card-title">📋 Como jogar?</h2>
+
+            <h3 style="color:#08480C; font-size:1rem; margin-bottom:12px;">👑 Administrador</h3>
+            <p style="color:#444; line-height:1.8; font-size:0.9rem;">
+                <b>Etapa 1: Criando a sala de apostas</b><br>
+                Crie uma sala de apostas e dê um nome a ela.<br>
+                Ao criar a sala você se torna um administrador e com isso, você terá direito a receber uma porcentagem
+                do valor das apostas que criar. Quanto mais apostas você criar, mais você irá lucrar!<br>
+                As salas são privadas e só entra quem for convidado.<br>
+                O ADM é o responsável por atualizar o placar em tempo real.<br>
+                <br>
+                <b>Etapa 2: Link de convidado</b><br>
+                Nesta etapa, você receberá um link de convidado para enviar para todas as pessoas que você conhece e que
+                gostariam de fazer uma fezinha.<br>
+                Você pode criar sua aposta no valor que quiser a partir de 10 reais.<br>
+                <br>
+                <b>Etapa 3: Cadastro</b><br>
+                Aqui o seu convidado faz o cadastro dele e entra na sua sala para participar da aposta.<br>
+                Logo após, os convidados farão o pagamento das apostas via código PIX.<br>
+                <br>
+                <b>Etapa 4: Pagamento</b><br>
+                Após o pagamento, seu convidado já estará participando da aposta criada por você.<br>
+                <br>
+                <b>Etapa 5: Recebimento</b><br>
+                Ao finalizar o jogo ou a brincadeira, seus convidados receberão o valor devido pelas apostas.
+            </p>
+
+            <h3 style="color:#08480C; font-size:1rem; margin: 20px 0 12px;">⚽ Apostador</h3>
+            <p style="color:#444; line-height:1.8; font-size:0.9rem;">
+                <b>Etapa 1: Convite</b><br>
+                Receba um link de convite enviado pelo administrador.<br>
+                <br>
+                <b>Etapa 2: Cadastro</b><br>
+                Faça o cadastro e entre na sala.<br>
+                <br>
+                <b>Etapa 3: Aposta</b><br>
+                Faça a aposta no valor que quiser a partir de 10 reais.<br>
+                <br>
+                <b>Etapa 4: Pagamento</b><br>
+                Efetue o pagamento da aposta via código PIX.<br>
+                <br>
+                <b>Etapa 5: Recebimento</b><br>
+                Ao finalizar o jogo ou a brincadeira, você receberá o valor devido pela aposta.
+            </p>
+        </div>
+
+        <div class="qaq-card">
+            <h2 class="card-title">🌐 Salas públicas abertas</h2>
+            <div id="salas-publicas-list">
+            {% if salas_publicas %}
+                <ul style="list-style:none; padding:0; margin:0;">
+                    {% for sala in salas_publicas %}
+                    <li style="padding:12px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <span style="font-weight:700; font-size:1rem;">{{ sala.nome_sala }}</span>
+                            <span style="font-size:0.82rem; color:#888; margin-left:10px;">por {{ sala.nome_criador }}</span>
+                            <br>
+                            <span style="font-size:0.85rem; color:#555;">⚽ {{ sala.time1 }} × {{ sala.time2 }}</span>
+                            <span style="font-size:0.85rem; color:#555; margin-left:12px;">💸 R$ {{ sala.valor }}</span>
+                        </div>
+                        {% if nome_usuario %}
+                            <a href="{{ url_for('salas.sala_convidado', id_sala=sala.id) }}" class="btn-qaq solid" style="font-size:0.82rem; padding:6px 14px;">Entrar</a>
+                        {% else %}
+                            <button class="btn-qaq solid btn-login-trigger" style="font-size:0.82rem; padding:6px 14px;">Login para entrar</button>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color:#888; font-size:0.9rem;">Nenhuma sala pública aberta no momento.</p>
+            {% endif %}
+            </div>
         </div>
 
     </div>
@@ -155,7 +186,7 @@
 <script>
 $(document).ready(function() {
     // Popup login
-    $('#btnLogin').click(function() { $('#loginPopup').addClass('active'); });
+    $('#btnLogin, .btn-login-trigger').click(function() { $('#loginPopup').addClass('active'); });
     $('#closePopup, #loginPopup').click(function(e) {
         if (e.target === this) $('#loginPopup').removeClass('active');
     });
@@ -182,6 +213,44 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Salas públicas — atualização automática
+    var logado = {{ 'true' if nome_usuario else 'false' }};
+
+    function renderSalasPublicas(salas) {
+        var container = $('#salas-publicas-list');
+        if (!salas.length) {
+            container.html('<p style="color:#888; font-size:0.9rem;">Nenhuma sala pública aberta no momento.</p>');
+            return;
+        }
+        var html = '<ul style="list-style:none; padding:0; margin:0;">';
+        salas.forEach(function(s) {
+            html += '<li style="padding:12px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">';
+            html += '<div>';
+            html += '<span style="font-weight:700; font-size:1rem;">' + $('<span>').text(s.nome_sala).html() + '</span>';
+            html += '<span style="font-size:0.82rem; color:#888; margin-left:10px;">por ' + $('<span>').text(s.nome_criador).html() + '</span><br>';
+            html += '<span style="font-size:0.85rem; color:#555;">⚽ ' + $('<span>').text(s.time1).html() + ' × ' + $('<span>').text(s.time2).html() + '</span>';
+            html += '<span style="font-size:0.85rem; color:#555; margin-left:12px;">💸 R$ ' + s.valor + '</span>';
+            html += '</div>';
+            if (logado) {
+                html += '<a href="/sala/' + s.id + '/convidado" class="btn-qaq solid" style="font-size:0.82rem; padding:6px 14px;">Entrar</a>';
+            } else {
+                html += '<button class="btn-qaq solid btn-login-trigger" style="font-size:0.82rem; padding:6px 14px;">Login para entrar</button>';
+            }
+            html += '</li>';
+        });
+        html += '</ul>';
+        container.html(html);
+        // Rebinda o evento de login nos novos botões
+        container.find('.btn-login-trigger').click(function() { $('#loginPopup').addClass('active'); });
+    }
+
+    function updateSalasPublicas() {
+        $.get('/salas/publicas', function(data) {
+            renderSalasPublicas(data);
+        });
+    }
+    setInterval(updateSalasPublicas, 3000);
 
     // Chat
     function updateChat() {

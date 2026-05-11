@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,7 @@
         {% endif %}
         <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
         <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
+        <a href="{{ url_for('salas.criar_sala') }}" class="btn-qaq solid">+ Criar sala</a>
         <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
     </div>
 </nav>

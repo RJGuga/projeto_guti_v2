@@ -20,8 +20,9 @@ def criar_sala():
             time1 = request.form['time1']
             time2 = request.form['time2']
             valor = request.form['valor']
+            publica = 1 if request.form.get('publica') == '1' else 0
             id_criador = session['usuario_id']
-            id_sala = insert_sala(nome_sala, time1, time2, valor, id_criador)
+            id_sala = insert_sala(nome_sala, time1, time2, valor, id_criador, publica)
             return redirect(url_for('salas.sala', id_sala=id_sala))
         except Exception as e:
             return f"Erro durante a criação da sala: {e}", 500
@@ -76,6 +77,13 @@ def encerrar_apostas(id_sala):
     encerrar_sala(id_sala)
     quantidade = get_quantidade_apostas_por_sala(id_sala)
     return jsonify({'quantidade_apostas': quantidade})
+
+
+@salas_bp.route('/salas/publicas', methods=['GET'])
+def salas_publicas_json():
+    from ..database import get_salas_publicas
+    salas = get_salas_publicas()
+    return jsonify(salas)
 
 
 @salas_bp.route('/sala/<int:id_sala>/quantidade_apostas', methods=['GET'])
