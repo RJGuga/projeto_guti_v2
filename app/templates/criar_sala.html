@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -23,8 +23,9 @@
 <div class="page-wrapper" style="max-width:540px;">
     <h1 class="page-title">🏟️ Criar nova sala</h1>
 
-    <div class="qaq-card">
-        <form action="/sala" method="POST" class="qaq-form">
+    <!-- PASSO 1: Preenchimento dos dados -->
+    <div id="step-1" class="qaq-card">
+        <form id="form-sala" action="/sala" method="POST" class="qaq-form">
 
             <label for="nome_sala">Nome da sala</label>
             <input type="text" id="nome_sala" name="nome_sala" placeholder="Ex: Clássico do Sábado" required>
@@ -39,10 +40,86 @@
                 <input type="text" id="time2" name="time2" placeholder="Time 2" required style="margin-bottom:0;">
             </div>
 
-            <input type="submit" value="🚀 Criar Sala">
+            <button type="button" id="btn-avancar" class="btn-qaq green" style="width:100%; padding:12px; font-size:1rem;">
+                Avançar ›
+            </button>
         </form>
     </div>
+
+    <!-- PASSO 2: Confirmação dos dados -->
+    <div id="step-2" class="qaq-card" style="display:none;">
+        <h2 class="card-title">✅ Confirmar abertura da sala</h2>
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">
+            <tr>
+                <td style="padding:10px 0; color:#555; font-weight:600;">Nome da sala</td>
+                <td id="conf-nome" style="padding:10px 0; font-weight:700; color:#08480C;"></td>
+            </tr>
+            <tr style="border-top:1px solid #eee;">
+                <td style="padding:10px 0; color:#555; font-weight:600;">Valor da aposta</td>
+                <td id="conf-valor" style="padding:10px 0; font-weight:700; color:#08480C;"></td>
+            </tr>
+            <tr style="border-top:1px solid #eee;">
+                <td style="padding:10px 0; color:#555; font-weight:600;">Times</td>
+                <td id="conf-times" style="padding:10px 0; font-weight:700; color:#08480C;"></td>
+            </tr>
+        </table>
+
+        <div style="display:flex; gap:12px;">
+            <button id="btn-ajustar" class="btn-qaq" style="flex:1; padding:12px; font-size:1rem;">
+                ‹ Ajustar
+            </button>
+            <button id="btn-confirmar" class="btn-qaq green" style="flex:1; padding:12px; font-size:1rem;">
+                ✔ Confirmar
+            </button>
+        </div>
+    </div>
 </div>
+
+<script>
+(function () {
+    const step1 = document.getElementById('step-1');
+    const step2 = document.getElementById('step-2');
+    const form  = document.getElementById('form-sala');
+
+    document.getElementById('btn-avancar').addEventListener('click', function () {
+        // Dispara validação nativa do browser
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        // Preenche o resumo
+        const nome  = document.getElementById('nome_sala').value.trim();
+        const valor = document.getElementById('valor').value;
+        const t1    = document.getElementById('time1').value.trim();
+        const t2    = document.getElementById('time2').value.trim();
+
+        document.getElementById('conf-nome').textContent  = nome;
+        document.getElementById('conf-valor').textContent = 'R$ ' + valor;
+        document.getElementById('conf-times').textContent = t1 + '  ×  ' + t2;
+
+        step1.style.display = 'none';
+        step2.style.display = 'block';
+    });
+
+    document.getElementById('btn-ajustar').addEventListener('click', function () {
+        step2.style.display = 'none';
+        step1.style.display = 'block';
+        document.getElementById('nome_sala').focus();
+    });
+
+    document.getElementById('btn-confirmar').addEventListener('click', function () {
+        form.submit();
+    });
+
+    // Atalho: ESC no passo 2 volta ao passo 1
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && step2.style.display === 'block') {
+            document.getElementById('btn-ajustar').click();
+        }
+    });
+}());
+</script>
 
 </body>
 </html>
