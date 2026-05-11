@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from database import get_usuario_por_email, insert_usuario, verificar_senha
+from ..database import get_usuario_por_email, insert_usuario, verificar_senha
 
 auth_bp = Blueprint('auth', __name__)
 

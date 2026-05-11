@@ -1,11 +1,8 @@
 import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask
-from config import DevelopmentConfig
-from database import create_tables
+from .config import DevelopmentConfig
+from .database import create_tables
 
 
 def create_app(config_class=DevelopmentConfig):
@@ -18,11 +15,11 @@ def create_app(config_class=DevelopmentConfig):
     with app.app_context():
         create_tables()
 
-    from routes.auth import auth_bp
-    from routes.main import main_bp
-    from routes.salas import salas_bp
-    from routes.apostas import apostas_bp
-    from routes.chat import chat_bp
+    from .routes.auth import auth_bp
+    from .routes.main import main_bp
+    from .routes.salas import salas_bp
+    from .routes.apostas import apostas_bp
+    from .routes.chat import chat_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)

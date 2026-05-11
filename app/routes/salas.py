@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from database import (
+from ..database import (
     insert_sala, get_sala_por_id, get_sala_detalhada_por_id,
     get_salas_criadas_por_usuario, encerrar_sala,
     get_quantidade_apostas_por_sala, get_quantidade_apostas_por_time,
     get_usuario_por_id
 )
-from decorators import login_required
+from ..decorators import login_required
 
 salas_bp = Blueprint('salas', __name__)
 

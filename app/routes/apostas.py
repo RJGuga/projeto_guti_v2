@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, jsonify
-from database import insert_aposta, get_apostas_por_usuario, get_sala_por_id
-from decorators import login_required
+from ..database import insert_aposta, get_apostas_por_usuario, get_sala_por_id
+from ..decorators import login_required
 
 apostas_bp = Blueprint('apostas', __name__)
 
