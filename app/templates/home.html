@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -33,6 +33,9 @@
     <div class="nav-links">
         {% if nome_usuario %}
             <span class="welcome">Olá, {{ nome_usuario }}!</span>
+            {% if saldo_carteira is not none %}
+                <a href="{{ url_for('carteira.carteira') }}" class="btn-qaq" style="color:#ffd700; font-weight:700;">💰 R$ {{ '%.2f'|format(saldo_carteira) }}</a>
+            {% endif %}
             <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
             <a href="{{ url_for('apostas.lista_apostas') }}" class="btn-qaq">Minhas apostas</a>
             <a href="{{ url_for('salas.criar_sala') }}" class="btn-qaq solid">+ Criar sala</a>

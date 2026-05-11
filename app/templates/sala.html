@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -16,6 +16,9 @@
     </a>
     <div class="nav-links">
         <span class="welcome">Olá, {{ nome_criador }}!</span>
+        {% if saldo_carteira is not none %}
+            <a href="{{ url_for('carteira.carteira') }}" class="btn-qaq" style="color:#ffd700; font-weight:700;">💰 R$ {{ '%.2f'|format(saldo_carteira) }}</a>
+        {% endif %}
         <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
         <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
         <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
@@ -37,12 +40,16 @@
                     <div class="stat-label">Valor da aposta</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-num">{{ apostas_time1 }}</div>
+                    <div class="stat-num" id="count-time1">{{ apostas_time1 }}</div>
                     <div class="stat-label">Apostas {{ sala.time1 }}</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-num">{{ apostas_time2 }}</div>
+                    <div class="stat-num" id="count-time2">{{ apostas_time2 }}</div>
                     <div class="stat-label">Apostas {{ sala.time2 }}</div>
+                </div>
+                <div class="stat-box" style="grid-column: span 3;">
+                    <div class="stat-num" id="count-total">{{ apostas_time1 + apostas_time2 }}</div>
+                    <div class="stat-label">Total de apostas</div>
                 </div>
             </div>
 
@@ -108,6 +115,17 @@ $(document).ready(function() {
     }
     updateChat();
     setInterval(updateChat, 5000);
+
+    // ── Polling de apostas em tempo real ─────────────────────
+    function updateApostas() {
+        $.get('/sala/{{ sala.id }}/status', function(s) {
+            $('#count-time1').text(s.apostas_time1);
+            $('#count-time2').text(s.apostas_time2);
+            $('#count-total').text(s.total_apostas);
+        });
+    }
+    updateApostas();
+    setInterval(updateApostas, 5000);
 
     $('#chat-form').submit(function(e) {
         e.preventDefault();

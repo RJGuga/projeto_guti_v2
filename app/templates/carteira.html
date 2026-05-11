@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Carteira – QAQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .saldo-destaque {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #08480C;
+            text-align: center;
+            margin: 10px 0 4px;
+        }
+        .saldo-label {
+            text-align: center;
+            font-size: 0.88rem;
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .valor-input-wrap {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .valor-input-wrap input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .transacao-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+        .transacao-item:last-child { border-bottom: none; }
+        .tipo-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .tipo-deposito  { background: #d4edda; color: #155724; }
+        .tipo-retirada  { background: #f8d7da; color: #721c24; }
+        .tipo-aposta    { background: #fff3cd; color: #856404; }
+        .tipo-premio    { background: #cce5ff; color: #004085; }
+        .valor-positivo { color: #155724; font-weight: 700; }
+        .valor-negativo { color: #721c24; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<nav class="qaq-navbar">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <span class="welcome">Olá, {{ nome_usuario }}!</span>
+        {% if saldo_carteira is not none %}
+            <span class="welcome" style="color:#ffd700; font-weight:700;">💰 R$ {{ '%.2f'|format(saldo_carteira) }}</span>
+        {% endif %}
+        <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
+        <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+    </div>
+</nav>
+
+<div class="page-wrapper" style="max-width: 700px;">
+    <h1 class="page-title">💰 Minha Carteira</h1>
+
+    {% if voltar %}
+    <div style="margin-bottom: 16px;">
+        <a href="{{ voltar }}" class="btn-qaq solid" style="display:inline-flex; align-items:center; gap:6px;">
+            ← Voltar à sala
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="grid-2" style="gap: 24px; align-items: start;">
+
+        <!-- Painel de saldo e operações -->
+        <div class="qaq-card">
+            <h2 class="card-title">💳 Saldo disponível</h2>
+            <div class="saldo-destaque" id="saldo-valor">R$ {{ '%.2f'|format(saldo) }}</div>
+            <div class="saldo-label">Saldo atual em conta fictícia</div>
+
+            <hr style="margin: 16px 0; border-color: #eee;">
+
+            <h3 style="font-size: 1rem; color: #333; margin-bottom: 12px;">➕ Depositar fundos</h3>
+            <div class="valor-input-wrap">
+                <input type="number" id="valor-deposito" min="1" step="0.01" placeholder="R$ 0,00">
+                <button class="btn-qaq solid" onclick="operacao('depositar')">Depositar</button>
+            </div>
+
+            <h3 style="font-size: 1rem; color: #333; margin: 18px 0 12px;">➖ Retirar fundos</h3>
+            <div class="valor-input-wrap">
+                <input type="number" id="valor-retirada" min="1" step="0.01" placeholder="R$ 0,00">
+                <button class="btn-qaq danger" onclick="operacao('retirar')">Retirar</button>
+            </div>
+        </div>
+
+        <!-- Histórico de transações -->
+        <div class="qaq-card">
+            <h2 class="card-title">📋 Histórico</h2>
+
+            {% if transacoes %}
+                <div style="max-height: 400px; overflow-y: auto;">
+                    {% for t in transacoes %}
+                    <div class="transacao-item">
+                        <div>
+                            <span class="tipo-badge tipo-{{ t.tipo }}">{{ t.tipo }}</span>
+                            {% if t.nome_sala %}
+                                <span style="font-size:0.8rem; color:#555; margin-left:6px;">{{ t.nome_sala }}</span>
+                            {% endif %}
+                            <div style="font-size: 0.75rem; color: #aaa; margin-top: 3px;">{{ t.data_hora }}</div>
+                        </div>
+                        <div class="{{ 'valor-positivo' if t.tipo in ['deposito', 'premio'] else 'valor-negativo' }}">
+                            {{ '+' if t.tipo in ['deposito', 'premio'] else '-' }}R$ {{ '%.2f'|format(t.valor) }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #888; font-size: 0.9rem;">Nenhuma movimentação encontrada.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+function operacao(tipo) {
+    var inputId = tipo === 'depositar' ? '#valor-deposito' : '#valor-retirada';
+    var valor = parseFloat($(inputId).val());
+    if (!valor || valor <= 0) {
+        Swal.fire({ icon: 'warning', title: 'Valor inválido', text: 'Digite um valor maior que zero.' });
+        return;
+    }
+
+    var url = tipo === 'depositar' ? '{{ url_for("carteira.carteira_depositar") }}' : '{{ url_for("carteira.carteira_retirar") }}';
+
+    $.post(url, { valor: valor }, function(r) {
+        if (r.status === 'sucesso') {
+            Swal.fire({
+                icon: 'success',
+                title: tipo === 'depositar' ? 'Depósito realizado!' : 'Retirada realizada!',
+                text: 'Novo saldo: R$ ' + r.saldo.toFixed(2),
+                showConfirmButton: false,
+                timer: 1800
+            }).then(function() { location.reload(); });
+        } else {
+            Swal.fire({ icon: 'error', title: 'Erro', text: r.mensagem });
+        }
+    }).fail(function(xhr) {
+        var msg = (xhr.responseJSON && xhr.responseJSON.mensagem) ? xhr.responseJSON.mensagem : 'Erro ao processar operação.';
+        Swal.fire({ icon: 'error', title: 'Erro', text: msg });
+    });
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,7 @@
         .radio-time input[type=radio]:checked + span {
             /* handled by JS */
         }
-        .radio-time label.selected { border-color: var(--ouro); background:rgba(255,215,0,0.12); }
+        .radio-time label.selected { border-color: #08480C; background: rgba(8,72,12,0.12); color: #08480C; }
 
         .popup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999; align-items:center; justify-content:center; }
         .popup-overlay.active { display:flex; }
@@ -35,6 +35,9 @@
     </a>
     <div class="nav-links">
         <span class="welcome" id="nav-nome"></span>
+        {% if saldo_carteira is not none %}
+            <a href="{{ url_for('carteira.carteira') }}" id="navbar-saldo" class="btn-qaq" style="color:#ffd700; font-weight:700;">💰 R$ {{ '%.2f'|format(saldo_carteira) }}</a>
+        {% endif %}
         <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
         <a href="{{ url_for('apostas.lista_apostas') }}" class="btn-qaq">Minhas apostas</a>
         <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
@@ -104,8 +107,14 @@
                     🔒 As apostas desta sala foram encerradas.
                 </div>
 
-                <div id="mensagem-enviada" style="display:none; text-align:center; padding:16px; background:#d4edda; border-radius:8px; color:#155724; font-weight:700; margin-top:12px;">
-                    ✅ Aposta registrada com sucesso!
+                <div id="mensagem-enviada" style="display:none; padding:16px; background:#d4edda; border-radius:8px; color:#155724; margin-top:12px;">
+                    <div style="font-weight:700; font-size:1rem; margin-bottom:8px;">✅ Aposta registrada com sucesso!</div>
+                    <div style="font-size:0.9rem;">⚽ Você apostou em: <span id="time-apostado" style="font-weight:900; font-size:1rem;"></span></div>
+                    <div style="font-size:0.85rem; margin-top:4px; color:#155724; opacity:0.8;">💸 Valor debitado: <b>R$ {{ valor_sala }}</b></div>
+                </div>
+
+                <!-- Painel de resultado (preenchido via polling) -->
+                <div id="painel-resultado" style="display:none; margin-top:16px; border-radius:10px; padding:20px; text-align:center;">
                 </div>
             </div>
 
@@ -221,11 +230,30 @@ $(document).ready(function() {
                 $.ajax({
                     url: '/confirmar-aposta', type:'POST', contentType:'application/json',
                     data: JSON.stringify({ id_sala: {{ sala.id }}, time: time }),
-                    success: function() {
-                        $('#radio-group .radio-time').hide();
-                        $('#confirmar-button').hide();
-                        $('#mensagemInfo').show();
-                        $('#enviar-button').show();
+                    success: function(r) {
+                        if (r.status === 'sucesso') {
+                            $('#radio-group .radio-time').hide();
+                            $('#confirmar-button').hide();
+                            $('#mensagemInfo').show();
+                            $('#enviar-button').show();
+                        }
+                    },
+                    error: function(xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.mensagem) ? xhr.responseJSON.mensagem : 'Erro ao confirmar aposta.';
+                        var isSaldoInsuficiente = msg === 'Saldo insuficiente';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ops!',
+                            text: msg,
+                            confirmButtonText: isSaldoInsuficiente ? 'Ir para a Carteira' : 'OK'
+                        }).then(function() {
+                            if (isSaldoInsuficiente) {
+                                window.location.href = '{{ url_for("carteira.carteira") }}?voltar={{ url_for("salas.sala_convidado", id_sala=sala.id) }}';
+                            }
+                        });
+                        // Volta para seleção: desmarca o time e remove destaque
+                        $('input[name="time-selection"]').prop('checked', false);
+                        $('#label-time1, #label-time2').removeClass('selected');
                     }
                 });
             }
@@ -233,16 +261,25 @@ $(document).ready(function() {
     });
 
     // ── Enviar aposta ────────────────────────────────────────
+    var timeSelecionado = null;
+    var resultadoExibido = false;
+
     $('#enviar-button').click(function() {
         var time = $('input[name="time-selection"]:checked').val();
         $.ajax({
             url: '/enviar-aposta', type:'POST', contentType:'application/json',
             data: JSON.stringify({ id_sala: {{ sala.id }}, time: time }),
             success: function() {
+                timeSelecionado = time;
                 $('#enviar-button').hide();
                 $('#mensagemInfo').hide();
                 $('#radio-group').hide();
+                $('#time-apostado').text(time);
                 $('#mensagem-enviada').show();
+                // Atualiza saldo da navbar imediatamente
+                $.get('/carteira/saldo', function(r) {
+                    $('#navbar-saldo').text('💰 R$ ' + r.saldo.toFixed(2));
+                });
                 Swal.fire({ icon:'success', title:'Aposta enviada!', showConfirmButton:false, timer:1500 });
             },
             error: function() { Swal.fire({ icon:'error', title:'Erro ao enviar aposta.' }); }
@@ -262,6 +299,55 @@ $(document).ready(function() {
     }
     updateChat();
     setInterval(updateChat, 5000);
+
+    // ── Polling de status da sala ─────────────────────────────
+    // Captura o time assim que a aposta é enviada
+    $('#enviar-button').on('aposta_enviada', function(e, time) {
+        timeSelecionado = time;
+    });
+
+    function checkStatus() {
+        if (resultadoExibido) return;
+        $.get('/sala/{{ sala.id }}/status', function(s) {
+            if (!s.vencedor) return;
+            resultadoExibido = true;
+
+            var painel = $('#painel-resultado');
+            // Oculta elementos que não fazem mais sentido
+            $('#radio-group').hide();
+            $('#confirmar-button').hide();
+            $('#mensagemInfo').hide();
+            $('#enviar-button').hide();
+            $('#mensagem-apostas-encerradas').hide();
+
+            if (!timeSelecionado) {
+                // Usuário não apostou nesta sessão, mostra só o vencedor
+                painel.css({'background':'#f0f4ff','border':'2px solid #b8c4ff'}).html(
+                    '<div style="font-size:1.1rem;font-weight:700;color:#003;margin-bottom:6px;">🏁 Resultado declarado</div>' +
+                    '<div style="font-size:1.3rem;font-weight:900;color:#08480C;">🥇 ' + s.vencedor + '</div>'
+                ).show();
+                return;
+            }
+
+            if (timeSelecionado === s.vencedor) {
+                var premioTxt = s.premio_por_vencedor
+                    ? '<div style="font-size:1rem;margin-top:8px;color:#155724;">💰 Valor creditado: <b>R$ ' + s.premio_por_vencedor.toFixed(2) + '</b></div>'
+                    : '';
+                painel.css({'background':'#d4edda','border':'2px solid #28a745'}).html(
+                    '<div style="font-size:1.5rem;font-weight:900;color:#155724;">🏆 Você ganhou!</div>' +
+                    '<div style="font-size:1rem;color:#155724;margin-top:4px;">Time vencedor: <b>' + s.vencedor + '</b></div>' +
+                    premioTxt
+                ).show();
+            } else {
+                painel.css({'background':'#f8d7da','border':'2px solid #dc3545'}).html(
+                    '<div style="font-size:1.5rem;font-weight:900;color:#721c24;">❌ Você perdeu.</div>' +
+                    '<div style="font-size:1rem;color:#721c24;margin-top:4px;">Time vencedor: <b>' + s.vencedor + '</b></div>'
+                ).show();
+            }
+        });
+    }
+    setInterval(checkStatus, 5000);
+    checkStatus();
 
     $('#chat-form').submit(function(e) {
         e.preventDefault();
