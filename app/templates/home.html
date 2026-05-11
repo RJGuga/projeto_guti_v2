@@ -1,0 +1,209 @@
+﻿﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAQ – Quer Apostar Quanto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .hero { text-align: center; padding: 40px 20px 20px; }
+        .hero img { height: 120px; width: auto; }
+        .hero .tagline { color: rgba(255,255,255,0.85); font-size: 1rem; margin-top: 8px; font-family: 'Comic Neue', cursive; }
+
+        .popup-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 999;
+            align-items: center; justify-content: center;
+        }
+        .popup-overlay.active { display: flex; }
+        .popup-box { background: #fff; border-radius: 14px; padding: 36px; width: 100%; max-width: 380px; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
+        .popup-box .close-btn { position: absolute; top: 12px; right: 16px; font-size: 1.4rem; cursor: pointer; color: #888; background: none; border: none; }
+        .popup-box h2 { margin-bottom: 20px; color: #08480C; font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="qaq-navbar">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ Logo">
+    </a>
+    <div class="nav-links">
+        {% if nome_usuario %}
+            <span class="welcome">Olá, {{ nome_usuario }}!</span>
+            <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
+            <a href="{{ url_for('apostas.lista_apostas') }}" class="btn-qaq">Minhas apostas</a>
+            <a href="{{ url_for('salas.criar_sala') }}" class="btn-qaq solid">+ Criar sala</a>
+            <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+        {% else %}
+            <button class="btn-qaq solid" id="btnLogin">Login</button>
+            <a href="{{ url_for('auth.cadastro') }}" class="btn-qaq">Cadastro</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <p class="tagline">O melhor site para disputas entre amigos 🏆</p>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="page-wrapper">
+    <div class="grid-2" style="gap:30px; align-items: start;">
+
+        <!-- COLUNA ESQUERDA: info -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="qaq-card">
+                <h2 class="card-title">🤔 O que é o QAQ?</h2>
+                <p style="color:#444; line-height:1.7; font-size:0.95rem;">
+                    <b><i>Quer Apostar Quanto</i></b> não é um site de apostas esportivas.<br>
+                    Somos uma plataforma cheia de fãs apaixonados e competitivos — amamos cada emoção de cada jogo,
+                    os gritos de vitória e o prazer de zoar os fãs rivais.<br><br>
+                    Aqui você junta os amigos, acompanha os jogos e lança seus desafios —
+                    do mesmo jeito que faria naquele churras em dia de clássico.<br><br>
+                    A diferença é que no <b><i>QAQ</i></b>, a caixa de breja não fica só na promessa. 🍺
+                </p>
+            </div>
+
+            <div class="qaq-card">
+                <h2 class="card-title">📋 Como jogar?</h2>
+
+                <h3 style="color:#08480C; font-size:1rem; margin-bottom:12px;">👑 Administrador</h3>
+                <p style="color:#444; line-height:1.8; font-size:0.9rem;">
+                    <b>Etapa 1: Criando a sala de apostas</b><br>
+                    Crie uma sala de apostas e dê um nome a ela.<br>
+                    Ao criar a sala você se torna um administrador e com isso, você terá direito a receber uma porcentagem
+                    do valor das apostas que criar. Quanto mais apostas você criar, mais você irá lucrar!<br>
+                    As salas são privadas e só entra quem for convidado.<br>
+                    O ADM é o responsável por atualizar o placar em tempo real.<br>
+                    <br>
+                    <b>Etapa 2: Link de convidado</b><br>
+                    Nesta etapa, você receberá um link de convidado para enviar para todas as pessoas que você conhece e que
+                    gostariam de fazer uma fezinha.<br>
+                    Você pode criar sua aposta no valor que quiser a partir de 10 reais.<br>
+                    <br>
+                    <b>Etapa 3: Cadastro</b><br>
+                    Aqui o seu convidado faz o cadastro dele e entra na sua sala para participar da aposta.<br>
+                    Logo após, os convidados farão o pagamento das apostas via código PIX.<br>
+                    <br>
+                    <b>Etapa 4: Pagamento</b><br>
+                    Após o pagamento, seu convidado já estará participando da aposta criada por você.<br>
+                    <br>
+                    <b>Etapa 5: Recebimento</b><br>
+                    Ao finalizar o jogo ou a brincadeira, seus convidados receberão o valor devido pelas apostas.
+                </p>
+
+                <h3 style="color:#08480C; font-size:1rem; margin: 20px 0 12px;">⚽ Apostador</h3>
+                <p style="color:#444; line-height:1.8; font-size:0.9rem;">
+                    <b>Etapa 1: Convite</b><br>
+                    Receba um link de convite enviado pelo administrador.<br>
+                    <br>
+                    <b>Etapa 2: Cadastro</b><br>
+                    Faça o cadastro e entre na sala.<br>
+                    <br>
+                    <b>Etapa 3: Aposta</b><br>
+                    Faça a aposta no valor que quiser a partir de 10 reais.<br>
+                    <br>
+                    <b>Etapa 4: Pagamento</b><br>
+                    Efetue o pagamento da aposta via código PIX.<br>
+                    <br>
+                    <b>Etapa 5: Recebimento</b><br>
+                    Ao finalizar o jogo ou a brincadeira, você receberá o valor devido pela aposta.
+                </p>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA: chat -->
+        <div class="chat-box">
+            <div class="chat-header">💬 Bate-papo ao vivo</div>
+            <div id="message-container">
+                <div id="chat-messages"></div>
+            </div>
+            <form id="chat-form" class="chat-footer">
+                <input type="text" id="message-input" placeholder="{% if nome_usuario %}Digite uma mensagem...{% else %}Fa��a login para conversar{% endif %}"
+                    {% if not nome_usuario %}disabled{% endif %}>
+                <button type="submit" {% if not nome_usuario %}disabled{% endif %}>Enviar</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- LOGIN POPUP -->
+<div class="popup-overlay" id="loginPopup">
+    <div class="popup-box">
+        <button class="close-btn" id="closePopup">&times;</button>
+        <h2>🔐 Login</h2>
+        <form id="loginForm" class="qaq-form" method="post">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+            <input type="submit" value="Entrar">
+        </form>
+        <p style="text-align:center; margin-top:14px; font-size:0.85rem; color:#666;">
+            Não tem conta? <a href="{{ url_for('auth.cadastro') }}" class="qaq-link">Cadastre-se</a>
+        </p>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Popup login
+    $('#btnLogin').click(function() { $('#loginPopup').addClass('active'); });
+    $('#closePopup, #loginPopup').click(function(e) {
+        if (e.target === this) $('#loginPopup').removeClass('active');
+    });
+
+    // Form login
+    $('#loginForm').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: "{{ url_for('auth.login') }}",
+            method: "POST",
+            data: { email: $('#email').val(), senha: $('#senha').val() },
+            success: function(r) {
+                if (r.status === 'sucesso') {
+                    Swal.fire({ icon:'success', title:'Bem-vindo!', text: 'Login efetuado com sucesso!', showConfirmButton:false, timer:1500 })
+                        .then(function() { location.reload(); });
+                } else if (r.mensagem === 'credenciais_invalidas') {
+                    Swal.fire({ icon:'error', title:'Senha incorreta', text:'Verifique sua senha e tente novamente.' });
+                } else {
+                    Swal.fire({ icon:'error', title:'E-mail não cadastrado', text:'Realize seu cadastro primeiro.' });
+                }
+            },
+            error: function() {
+                Swal.fire({ icon:'error', title:'Erro', text:'Não foi possível processar o login.' });
+            }
+        });
+    });
+
+    // Chat
+    function updateChat() {
+        $.get('/get_messages', function(data) {
+            var html = data.map(function(m) {
+                return '<p><strong>' + $('<span>').text(m.username).html() + ':</strong> ' + $('<span>').text(m.message).html() + '</p>';
+            }).join('');
+            $('#chat-messages').html(html);
+            var c = document.getElementById('message-container');
+            c.scrollTop = c.scrollHeight;
+        });
+    }
+    updateChat();
+    setInterval(updateChat, 5000);
+
+    $('#chat-form').submit(function(e) {
+        e.preventDefault();
+        var msg = $('#message-input').val().trim();
+        if (!msg) return;
+        $.post('/send_message', { message: msg }, function() {
+            $('#message-input').val('');
+            updateChat();
+        });
+    });
+});
+</script>
+</body>
+</html>

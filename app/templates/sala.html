@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala {{ sala.nome_sala }} – QAQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+<nav class="qaq-navbar">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <span class="welcome">Olá, {{ nome_criador }}!</span>
+        <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
+        <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
+        <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+    </div>
+</nav>
+
+<div class="page-wrapper">
+    <h1 class="page-title">🏟️ {{ sala.nome_sala }}</h1>
+
+    <div class="grid-2" style="gap:28px; align-items:start;">
+
+        <!-- Painel de gerenciamento -->
+        <div class="qaq-card">
+            <h2 class="card-title">⚙️ Gerenciamento da sala</h2>
+
+            <div class="grid-3" style="margin-bottom:24px;">
+                <div class="stat-box">
+                    <div class="stat-num">R$ {{ sala.valor }}</div>
+                    <div class="stat-label">Valor da aposta</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">{{ apostas_time1 }}</div>
+                    <div class="stat-label">Apostas {{ sala.time1 }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">{{ apostas_time2 }}</div>
+                    <div class="stat-label">Apostas {{ sala.time2 }}</div>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin:20px 0;">
+                <span style="font-size:1.4rem; font-weight:900; color:#08480C;">{{ sala.time1 }}</span>
+                <span style="font-size:1.2rem; margin:0 16px; color:#888;">×</span>
+                <span style="font-size:1.4rem; font-weight:900; color:#08480C;">{{ sala.time2 }}</span>
+            </div>
+
+            <!-- Link de convite -->
+            <div id="url-container" style="display:none; margin-bottom:16px;">
+                <label style="font-weight:600; font-size:0.88rem; color:#333; display:block; margin-bottom:6px;">🔗 Link de convite</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="url-field" readonly style="flex:1; padding:8px 12px; border:1.5px solid #ddd; border-radius:8px; font-size:0.85rem; background:#f8f9fa;">
+                    <button onclick="copyURL()" class="btn-qaq solid" style="white-space:nowrap;">Copiar</button>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button id="btn-iniciar" class="btn-qaq green" style="width:100%; padding:12px; font-size:1rem;"
+                    onclick="exibirURL(); document.getElementById('encerrar-wrap').style.display='block'; this.style.display='none';">
+                    ▶ Iniciar — Gerar link de convite
+                </button>
+
+                <div id="encerrar-wrap" style="display:none;">
+                    <form id="encerrar-apostas-form" onsubmit="encerrarApostas(event)">
+                        <button id="btn-encerrar-apostas" class="btn-qaq danger" style="width:100%; padding:12px; font-size:1rem;" type="submit">
+                            🔒 Encerrar apostas
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat da sala -->
+        <div class="chat-box">
+            <div class="chat-header">💬 Chat da sala</div>
+            <div id="message-container">
+                <div id="chat-messages"></div>
+            </div>
+            <form id="chat-form" class="chat-footer">
+                <input type="hidden" id="sala-id" value="{{ sala.id }}">
+                <input type="text" id="message-input" placeholder="Digite uma mensagem...">
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    function updateChat() {
+        $.get('/get_messages_por_sala', { id_sala: $('#sala-id').val() }, function(data) {
+            var html = data.map(function(m) {
+                return '<p><strong>' + $('<span>').text(m.username).html() + ':</strong> ' + $('<span>').text(m.message).html() + '</p>';
+            }).join('');
+            $('#chat-messages').html(html);
+            var c = document.getElementById('message-container');
+            c.scrollTop = c.scrollHeight;
+        });
+    }
+    updateChat();
+    setInterval(updateChat, 5000);
+
+    $('#chat-form').submit(function(e) {
+        e.preventDefault();
+        var msg = $('#message-input').val().trim();
+        if (!msg) return;
+        $.post('/send_message_por_sala', { message: msg, id_sala: $('#sala-id').val() }, function() {
+            $('#message-input').val('');
+            updateChat();
+        });
+    });
+});
+
+function exibirURL() {
+    var url = window.location.origin + '/sala/{{ sala.id }}/convidado';
+    document.getElementById('url-field').value = url;
+    document.getElementById('url-container').style.display = 'block';
+}
+
+function copyURL() {
+    var f = document.getElementById('url-field');
+    f.select(); f.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    Swal.fire({ icon:'success', title:'Link copiado!', showConfirmButton:false, timer:1200 });
+}
+
+function encerrarApostas(event) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Encerrar apostas?',
+        text: 'Certifique-se que todos os convidados já fizeram suas apostas.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar',
+        cancelButtonText: 'Cancelar'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $('#btn-encerrar-apostas').prop('disabled', true).text('Encerrando...');
+            fetch('/sala/{{ sala.id }}/encerrar_apostas', { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    Swal.fire({ icon:'success', title:'Apostas encerradas!', showConfirmButton:false, timer:1500 })
+                        .then(() => { window.location.href = '/sala/{{ sala.id }}/apostas_realizadas'; });
+                });
+        }
+    });
+}
+</script>
+</body>
+</html>

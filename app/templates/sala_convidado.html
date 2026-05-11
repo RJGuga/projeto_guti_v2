@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} – Convidado – QAQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .radio-time { display:flex; gap:16px; margin:20px 0; }
+        .radio-time label {
+            flex:1; display:flex; align-items:center; justify-content:center;
+            gap:10px; padding:16px; border:2px solid #ddd; border-radius:10px;
+            cursor:pointer; font-weight:700; font-size:1rem; transition:all 0.2s;
+        }
+        .radio-time input[type=radio] { display:none; }
+        .radio-time input[type=radio]:checked + span {
+            /* handled by JS */
+        }
+        .radio-time label.selected { border-color: var(--ouro); background:rgba(255,215,0,0.12); }
+
+        .popup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999; align-items:center; justify-content:center; }
+        .popup-overlay.active { display:flex; }
+        .popup-box { background:#fff; border-radius:14px; padding:36px; width:100%; max-width:380px; position:relative; box-shadow:0 8px 40px rgba(0,0,0,0.3); }
+        .popup-box .close-btn { position:absolute; top:12px; right:16px; font-size:1.4rem; cursor:pointer; color:#888; background:none; border:none; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR: muda conforme login -->
+<nav class="qaq-navbar" id="navbar-logado" style="display:none;">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <span class="welcome" id="nav-nome"></span>
+        <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
+        <a href="{{ url_for('apostas.lista_apostas') }}" class="btn-qaq">Minhas apostas</a>
+        <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+    </div>
+</nav>
+
+<nav class="qaq-navbar" id="navbar-deslogado">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <button class="btn-qaq solid" id="btnLogin">Login</button>
+        <a href="{{ url_for('auth.cadastro') }}" class="btn-qaq">Cadastro</a>
+    </div>
+</nav>
+
+<!-- Tela de não-logado -->
+<div id="tela-login" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; padding:40px 20px; text-align:center;">
+    <h2 style="color:#fff; font-size:1.5rem; margin-bottom:10px;">🔐 Faça login para apostar</h2>
+    <p style="color:rgba(255,255,255,0.8); margin-bottom:24px;">Você precisa estar logado para participar desta sala.</p>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn-qaq solid" id="btnLoginTela">Fazer Login</button>
+        <a href="{{ url_for('auth.cadastro') }}" class="btn-qaq">Criar conta</a>
+    </div>
+</div>
+
+<!-- Tela principal (após login) -->
+<div id="tela-principal" style="display:none;">
+    <div class="page-wrapper">
+        <h1 class="page-title">🏟️ {{ titulo }}</h1>
+
+        <div class="grid-2" style="gap:28px; align-items:start;">
+
+            <!-- Área de apostas -->
+            <div class="qaq-card">
+                <h2 class="card-title">⚽ Faça sua aposta</h2>
+                <p style="color:#666; font-size:0.9rem; margin-bottom:8px;">Criador: <b>{{ nome_criador }}</b></p>
+                <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">Valor: <b>R$ {{ valor_sala }}</b></p>
+
+                <div id="radio-group">
+                    <p style="font-weight:600; margin-bottom:12px;">Escolha o time vencedor:</p>
+                    <div class="radio-time">
+                        <label id="label-time1">
+                            <input type="radio" name="time-selection" value="{{ sala.time1 }}">
+                            <span>{{ sala.time1 }}</span>
+                        </label>
+                        <label id="label-time2">
+                            <input type="radio" name="time-selection" value="{{ sala.time2 }}">
+                            <span>{{ sala.time2 }}</span>
+                        </label>
+                    </div>
+
+                    <button id="confirmar-button" class="btn-qaq solid" style="width:100%; padding:12px; font-size:1rem;" data-sala-id="{{ sala.id }}">
+                        ✔ Confirmar escolha
+                    </button>
+                </div>
+
+                <div id="mensagemInfo" style="display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:12px; margin:16px 0; font-size:0.9rem;">
+                    <strong>⚠️ ATENÇÃO!</strong> Sua aposta só será registrada após clicar em <b>Enviar aposta</b>.
+                </div>
+
+                <button id="enviar-button" class="btn-qaq green" style="display:none; width:100%; padding:12px; font-size:1rem; margin-top:8px;">
+                    🚀 Enviar aposta
+                </button>
+
+                <div id="mensagem-apostas-encerradas" style="display:none; text-align:center; padding:20px; background:#f8d7da; border-radius:8px; color:#721c24; font-weight:700;">
+                    🔒 As apostas desta sala foram encerradas.
+                </div>
+
+                <div id="mensagem-enviada" style="display:none; text-align:center; padding:16px; background:#d4edda; border-radius:8px; color:#155724; font-weight:700; margin-top:12px;">
+                    ✅ Aposta registrada com sucesso!
+                </div>
+            </div>
+
+            <!-- Chat -->
+            <div class="chat-box">
+                <div class="chat-header">💬 Chat da sala</div>
+                <div id="message-container">
+                    <div id="chat-messages"></div>
+                </div>
+                <form id="chat-form" class="chat-footer">
+                    <input type="hidden" id="sala-id" value="{{ sala.id }}">
+                    <input type="text" id="message-input" placeholder="Digite uma mensagem...">
+                    <button type="submit">Enviar</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- LOGIN POPUP -->
+<div class="popup-overlay" id="loginPopup">
+    <div class="popup-box">
+        <button class="close-btn" id="closePopup">&times;</button>
+        <h2 style="color:#08480C; margin-bottom:20px;">🔐 Login</h2>
+        <form id="loginForm" class="qaq-form" method="post">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+            <input type="submit" value="Entrar">
+        </form>
+        <p style="text-align:center; margin-top:14px; font-size:0.85rem; color:#666;">
+            Não tem conta? <a href="{{ url_for('auth.cadastro') }}" class="qaq-link">Cadastre-se</a>
+        </p>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    // ── Verifica sessão ──────────────────────────────────────
+    {% if session.get('usuario_id') %}
+        mostrarTelaLogado('{{ session.get("nome", "") }}');
+        {% if sala.encerrada %}
+            ocultarApostas();
+        {% endif %}
+    {% else %}
+        $('#tela-login').show();
+        $('#navbar-deslogado').show();
+        $('#navbar-logado').hide();
+    {% endif %}
+
+    function mostrarTelaLogado(nome) {
+        $('#tela-login').hide();
+        $('#tela-principal').show();
+        $('#navbar-deslogado').hide();
+        $('#navbar-logado').show();
+        $('#nav-nome').text('Olá, ' + nome + '!');
+    }
+
+    function ocultarApostas() {
+        $('#radio-group').hide();
+        $('#mensagem-apostas-encerradas').show();
+        $('#enviar-button').hide();
+    }
+
+    // ── Popup login ──────────────────────────────────────────
+    $('#btnLogin, #btnLoginTela').click(function() { $('#loginPopup').addClass('active'); });
+    $('#closePopup').click(function() { $('#loginPopup').removeClass('active'); });
+    $('#loginPopup').click(function(e) { if (e.target === this) $(this).removeClass('active'); });
+
+    $('#loginForm').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: "{{ url_for('auth.login') }}",
+            method: "POST",
+            data: { email: $('#email').val(), senha: $('#senha').val() },
+            success: function(r) {
+                if (r.status === 'sucesso') {
+                    Swal.fire({ icon:'success', title:'Bem-vindo, ' + r.name + '!', showConfirmButton:false, timer:1300 })
+                        .then(function() {
+                            $('#loginPopup').removeClass('active');
+                            mostrarTelaLogado(r.name);
+                            {% if sala.encerrada %} ocultarApostas(); {% endif %}
+                        });
+                } else if (r.mensagem === 'credenciais_invalidas') {
+                    Swal.fire({ icon:'error', title:'Senha incorreta', text:'Verifique e tente novamente.' });
+                } else {
+                    Swal.fire({ icon:'error', title:'E-mail não cadastrado', text:'Realize seu cadastro primeiro.' });
+                }
+            },
+            error: function() { Swal.fire({ icon:'error', title:'Erro de conexão.' }); }
+        });
+    });
+
+    // ── Seleção de time visual ────────────────────────────────
+    $('input[name="time-selection"]').change(function() {
+        $('#label-time1, #label-time2').removeClass('selected');
+        $(this).closest('label').addClass('selected');
+    });
+
+    // ── Confirmar aposta ─────────────────────────────────────
+    $('#confirmar-button').click(function() {
+        var time = $('input[name="time-selection"]:checked').val();
+        if (!time) { Swal.fire({ icon:'warning', title:'Selecione um time!' }); return; }
+        Swal.fire({
+            icon:'info', title:'Confirmar aposta?',
+            text: 'Você vai apostar em: ' + time,
+            showCancelButton:true, confirmButtonText:'Confirmar', cancelButtonText:'Corrigir'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/confirmar-aposta', type:'POST', contentType:'application/json',
+                    data: JSON.stringify({ id_sala: {{ sala.id }}, time: time }),
+                    success: function() {
+                        $('#radio-group .radio-time').hide();
+                        $('#confirmar-button').hide();
+                        $('#mensagemInfo').show();
+                        $('#enviar-button').show();
+                    }
+                });
+            }
+        });
+    });
+
+    // ── Enviar aposta ────────────────────────────────────────
+    $('#enviar-button').click(function() {
+        var time = $('input[name="time-selection"]:checked').val();
+        $.ajax({
+            url: '/enviar-aposta', type:'POST', contentType:'application/json',
+            data: JSON.stringify({ id_sala: {{ sala.id }}, time: time }),
+            success: function() {
+                $('#enviar-button').hide();
+                $('#mensagemInfo').hide();
+                $('#radio-group').hide();
+                $('#mensagem-enviada').show();
+                Swal.fire({ icon:'success', title:'Aposta enviada!', showConfirmButton:false, timer:1500 });
+            },
+            error: function() { Swal.fire({ icon:'error', title:'Erro ao enviar aposta.' }); }
+        });
+    });
+
+    // ── Chat ─────────────────────────────────────────────────
+    function updateChat() {
+        $.get('/get_messages_por_sala', { id_sala: {{ sala.id }} }, function(data) {
+            var html = data.map(function(m) {
+                return '<p><strong>' + $('<span>').text(m.username).html() + ':</strong> ' + $('<span>').text(m.message).html() + '</p>';
+            }).join('');
+            $('#chat-messages').html(html);
+            var c = document.getElementById('message-container');
+            if (c) c.scrollTop = c.scrollHeight;
+        });
+    }
+    updateChat();
+    setInterval(updateChat, 5000);
+
+    $('#chat-form').submit(function(e) {
+        e.preventDefault();
+        var msg = $('#message-input').val().trim();
+        if (!msg) return;
+        $.post('/send_message_por_sala', { message: msg, id_sala: {{ sala.id }} }, function() {
+            $('#message-input').val('');
+            updateChat();
+        });
+    });
+});
+</script>
+</body>
+</html>

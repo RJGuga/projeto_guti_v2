@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Apostas – QAQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="qaq-navbar">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <span class="welcome">Olá, {{ nome_usuario }}!</span>
+        <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
+        <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+    </div>
+</nav>
+
+<div class="page-wrapper" style="max-width:740px;">
+    <h1 class="page-title">🎯 Minhas apostas</h1>
+
+    <div class="grid-2" style="gap:24px; align-items:start;">
+
+        <div class="qaq-card">
+            <h2 class="card-title" style="color:#155724;">🟢 Apostas em aberto</h2>
+            {% if apostas_abertas %}
+                <ul style="list-style:none; padding:0; margin:0;">
+                    {% for aposta, nome_sala in apostas_abertas %}
+                    <li style="padding:10px 0; border-bottom:1px solid #eee;">
+                        <a href="{{ url_for('salas.sala', id_sala=aposta.id_sala) }}" class="qaq-link" style="font-weight:600;">{{ nome_sala }}</a>
+                        <br>
+                        <span style="font-size:0.83rem; color:#555;">⚽ Apostou em: <b>{{ aposta.time_selecionado }}</b></span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color:#888; font-size:0.9rem;">Nenhuma aposta em aberto.</p>
+            {% endif %}
+        </div>
+
+        <div class="qaq-card">
+            <h2 class="card-title" style="color:#721c24;">🔴 Apostas encerradas</h2>
+            {% if apostas_encerradas %}
+                <ul style="list-style:none; padding:0; margin:0;">
+                    {% for aposta, nome_sala in apostas_encerradas %}
+                    <li style="padding:10px 0; border-bottom:1px solid #eee;">
+                        <a href="{{ url_for('salas.resultado', id_sala=aposta.id_sala) }}" class="qaq-link" style="font-weight:600;">{{ nome_sala }}</a>
+                        <br>
+                        <span style="font-size:0.83rem; color:#555;">⚽ Apostou em: <b>{{ aposta.time_selecionado }}</b></span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color:#888; font-size:0.9rem;">Nenhuma aposta encerrada.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

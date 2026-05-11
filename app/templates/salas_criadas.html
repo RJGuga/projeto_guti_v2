@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Salas – QAQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="qaq-navbar">
+    <a href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="QAQ">
+    </a>
+    <div class="nav-links">
+        <span class="welcome">Olá, {{ nome_usuario }}!</span>
+        <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
+        <a href="{{ url_for('salas.criar_sala') }}" class="btn-qaq solid">+ Criar sala</a>
+        <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
+    </div>
+</nav>
+
+<div class="page-wrapper" style="max-width:700px;">
+    <h1 class="page-title">🏟️ Minhas salas</h1>
+
+    <div class="grid-2" style="gap:24px; align-items:start;">
+
+        <div class="qaq-card">
+            <h2 class="card-title" style="color:#155724;">🟢 Salas abertas</h2>
+            {% if salas_abertas %}
+                <ul style="list-style:none; padding:0; margin:0;">
+                    {% for sala in salas_abertas %}
+                    <li style="padding:10px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:600;">{{ sala.nome_sala }}</span>
+                        <a href="{{ url_for('salas.sala', id_sala=sala.id) }}" class="btn-qaq green" style="font-size:0.78rem; padding:5px 12px;">Acessar</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color:#888; font-size:0.9rem;">Nenhuma sala aberta.</p>
+            {% endif %}
+        </div>
+
+        <div class="qaq-card">
+            <h2 class="card-title" style="color:#721c24;">🔴 Salas encerradas</h2>
+            {% if salas_encerradas %}
+                <ul style="list-style:none; padding:0; margin:0;">
+                    {% for sala in salas_encerradas %}
+                    <li style="padding:10px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:600;">{{ sala.nome_sala }}</span>
+                        <a href="{{ url_for('salas.resultado', id_sala=sala.id) }}" class="btn-qaq" style="font-size:0.78rem; padding:5px 12px;">Resultado</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color:#888; font-size:0.9rem;">Nenhuma sala encerrada.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
