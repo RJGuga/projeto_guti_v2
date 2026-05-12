@@ -70,6 +70,7 @@ def create_tables():
         'ALTER TABLE salas ADD COLUMN paga INTEGER DEFAULT 0',
         'ALTER TABLE salas ADD COLUMN vencedor TEXT DEFAULT NULL',
         'ALTER TABLE salas ADD COLUMN publica INTEGER DEFAULT 0',
+        'ALTER TABLE salas ADD COLUMN iniciada INTEGER DEFAULT 0',
     ]:
         try:
             cursor.execute(ddl)
@@ -164,7 +165,7 @@ def get_sala_detalhada_por_id(id_sala):
 
 def get_salas_criadas_por_usuario(id_usuario):
     conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM salas WHERE id_criador = ?', (id_usuario,)).fetchall()
+    rows = conn.execute('SELECT * FROM salas WHERE id_criador = ? ORDER BY id DESC', (id_usuario,)).fetchall()
     conn.close()
     return rows
 
@@ -172,6 +173,13 @@ def get_salas_criadas_por_usuario(id_usuario):
 def encerrar_sala(id_sala):
     conn = get_db_connection()
     conn.execute('UPDATE salas SET encerrada = 1 WHERE id = ?', (id_sala,))
+    conn.commit()
+    conn.close()
+
+
+def iniciar_sala(id_sala):
+    conn = get_db_connection()
+    conn.execute('UPDATE salas SET iniciada = 1 WHERE id = ?', (id_sala,))
     conn.commit()
     conn.close()
 

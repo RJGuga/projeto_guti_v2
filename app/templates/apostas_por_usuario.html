@@ -33,7 +33,7 @@
                 <ul style="list-style:none; padding:0; margin:0;">
                     {% for aposta, sala in apostas_abertas %}
                     <li style="padding:10px 0; border-bottom:1px solid #eee;">
-                        <a href="{{ url_for('salas.sala', id_sala=aposta.id_sala) }}" class="qaq-link" style="font-weight:600;">{{ sala.nome_sala }}</a>
+                        <a href="{{ url_for('salas.sala_convidado', id_sala=aposta.id_sala) }}" class="qaq-link" style="font-weight:600;">{{ sala.nome_sala }}</a>
                         <br>
                         <span style="font-size:0.83rem; color:#555;">⚽ Apostou em: <b>{{ aposta.time_selecionado }}</b></span>
                         <br>

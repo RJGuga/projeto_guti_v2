@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from ..database import (
     insert_sala, get_sala_por_id, get_sala_detalhada_por_id,
-    get_salas_criadas_por_usuario, encerrar_sala,
+    get_salas_criadas_por_usuario, encerrar_sala, iniciar_sala,
     get_quantidade_apostas_por_sala, get_quantidade_apostas_por_time,
     get_usuario_por_id, get_apostadores_por_time, creditar_premio,
     marcar_sala_paga, sala_ja_paga, salvar_vencedor
@@ -79,6 +79,13 @@ def encerrar_apostas(id_sala):
     return jsonify({'quantidade_apostas': quantidade})
 
 
+@salas_bp.route('/sala/<int:id_sala>/iniciar', methods=['POST'])
+@login_required
+def iniciar_sala_route(id_sala):
+    iniciar_sala(id_sala)
+    return jsonify({'ok': True})
+
+
 @salas_bp.route('/salas/publicas', methods=['GET'])
 def salas_publicas_json():
     from ..database import get_salas_publicas
@@ -150,7 +157,7 @@ def resultado(id_sala):
 
     criador = get_usuario_por_id(sala['id_criador'])
     nome_criador = criador['nome'] if criador else ''
-    vencedor = request.args.get('vencedor')
+    vencedor = request.args.get('vencedor') or sala['vencedor']
     apostas_time1 = get_quantidade_apostas_por_time(id_sala, sala['time1'])
     apostas_time2 = get_quantidade_apostas_por_time(id_sala, sala['time2'])
     quantidade_apostas = get_quantidade_apostas_por_sala(id_sala)

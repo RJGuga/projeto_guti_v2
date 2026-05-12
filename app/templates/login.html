@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -35,7 +35,7 @@ $('#loginForm').submit(function(e) {
     $.ajax({
         url: "{{ url_for('auth.login') }}",
         method: "POST",
-        data: { email: $('#email').val(), senha: $('#senha').val() },
+        data: { email: $('#email').val(), senha: $('#senha').val(), next: $('input[name="next"]').val() },
         success: function(r) {
             if (r.status === 'sucesso') {
                 Swal.fire({ icon:'success', title:'Bem-vindo!', showConfirmButton:false, timer:1500 })

@@ -66,22 +66,24 @@
             </div>
 
             <!-- Link de convite -->
-            <div id="url-container" style="display:none; margin-bottom:16px;">
+            <div id="url-container" style="display:{% if sala.iniciada %}block{% else %}none{% endif %}; margin-bottom:16px;">
                 <label style="font-weight:600; font-size:0.88rem; color:#333; display:block; margin-bottom:6px;">🔗 Link de convite</label>
                 <div style="display:flex; gap:8px;">
-                    <input type="text" id="url-field" readonly style="flex:1; padding:8px 12px; border:1.5px solid #ddd; border-radius:8px; font-size:0.85rem; background:#f8f9fa;">
+                    <input type="text" id="url-field" readonly
+                        value="{% if sala.iniciada %}{{ url_for('salas.sala_convidado', id_sala=sala.id, _external=True) }}{% endif %}"
+                        style="flex:1; padding:8px 12px; border:1.5px solid #ddd; border-radius:8px; font-size:0.85rem; background:#f8f9fa;">
                     <button onclick="copyURL()" class="btn-qaq solid" style="white-space:nowrap;">Copiar</button>
                 </div>
             </div>
 
             <!-- Ações -->
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button id="btn-iniciar" class="btn-qaq green" style="width:100%; padding:12px; font-size:1rem;"
-                    onclick="exibirURL(); document.getElementById('encerrar-wrap').style.display='block'; this.style.display='none';">
+                <button id="btn-iniciar" class="btn-qaq green" style="width:100%; padding:12px; font-size:1rem; display:{% if sala.iniciada %}none{% else %}block{% endif %};"
+                    onclick="iniciarSala();">
                     ▶ Iniciar — Gerar link de convite
                 </button>
 
-                <div id="encerrar-wrap" style="display:none;">
+                <div id="encerrar-wrap" style="display:{% if sala.iniciada %}block{% else %}none{% endif %};">
                     <form id="encerrar-apostas-form" onsubmit="encerrarApostas(event)">
                         <button id="btn-encerrar-apostas" class="btn-qaq danger" style="width:100%; padding:12px; font-size:1rem;" type="submit">
                             🔒 Encerrar apostas
@@ -144,10 +146,16 @@ $(document).ready(function() {
     });
 });
 
-function exibirURL() {
-    var url = window.location.origin + '/sala/{{ sala.id }}/convidado';
-    document.getElementById('url-field').value = url;
-    document.getElementById('url-container').style.display = 'block';
+function iniciarSala() {
+    fetch('/sala/{{ sala.id }}/iniciar', { method: 'POST' })
+        .then(r => r.json())
+        .then(function() {
+            var url = window.location.origin + '/sala/{{ sala.id }}/convidado';
+            document.getElementById('url-field').value = url;
+            document.getElementById('url-container').style.display = 'block';
+            document.getElementById('encerrar-wrap').style.display = 'block';
+            document.getElementById('btn-iniciar').style.display = 'none';
+        });
 }
 
 function copyURL() {
