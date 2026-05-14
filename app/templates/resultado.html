@@ -19,7 +19,6 @@
             <a href="{{ url_for('carteira.carteira') }}" class="btn-qaq" style="color:#ffd700; font-weight:700;">💰 R$ {{ '%.2f'|format(saldo_carteira) }}</a>
         {% endif %}
         <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
-        <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
         <a href="{{ url_for('salas.criar_sala') }}" class="btn-qaq solid">+ Criar sala</a>
         <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
     </div>
@@ -33,7 +32,15 @@
         <!-- Painel de resultado financeiro -->
         <div class="qaq-card">
 
-            {% if vencedor %}
+            {% if vencedor == 'Empate' %}
+            <!-- Banner de empate -->
+            <div style="text-align:center; background:linear-gradient(135deg,#7a6000,#c9a227); border-radius:10px; padding:24px; margin-bottom:24px; color:#fff;">
+                <div style="font-size:2.5rem;">🤝</div>
+                <div style="font-size:1.6rem; font-weight:900; color:#fff; margin:8px 0;">EMPATE!</div>
+                <div style="font-size:0.9rem; opacity:0.85;">O valor será dividido igualmente entre todos os apostadores</div>
+            </div>
+
+            {% elif vencedor %}
             <!-- Banner do vencedor -->
             <div style="text-align:center; background:linear-gradient(135deg,#08480C,#0A6317); border-radius:10px; padding:24px; margin-bottom:24px; color:#fff;">
                 <div style="font-size:2.5rem;">🥇</div>
@@ -67,22 +74,35 @@
 
             <!-- Apostas por time -->
             <div class="grid-2" style="margin-bottom:24px;">
-                <div class="stat-box" style="{% if vencedor == sala.time1 %}border:2px solid var(--ouro);{% endif %}">
+                <div class="stat-box" style="{% if vencedor == sala.time1 %}border:2px solid var(--ouro);{% elif vencedor == 'Empate' %}border:2px solid #c9a227;{% endif %}">
                     <div class="stat-num">{{ apostas_time1 }}</div>
                     <div class="stat-label">Apostas em {{ sala.time1 }}
-                        {% if vencedor == sala.time1 %}<span class="badge-open" style="margin-left:4px;">✓ Vencedor</span>{% endif %}
+                        {% if vencedor == sala.time1 %}<span class="badge-open" style="margin-left:4px;">✓ Vencedor</span>
+                        {% elif vencedor == 'Empate' %}<span class="badge-open" style="margin-left:4px; background:#c9a227;">🤝 Empate</span>{% endif %}
                     </div>
                 </div>
-                <div class="stat-box" style="{% if vencedor == sala.time2 %}border:2px solid var(--ouro);{% endif %}">
+                <div class="stat-box" style="{% if vencedor == sala.time2 %}border:2px solid var(--ouro);{% elif vencedor == 'Empate' %}border:2px solid #c9a227;{% endif %}">
                     <div class="stat-num">{{ apostas_time2 }}</div>
                     <div class="stat-label">Apostas em {{ sala.time2 }}
-                        {% if vencedor == sala.time2 %}<span class="badge-open" style="margin-left:4px;">✓ Vencedor</span>{% endif %}
+                        {% if vencedor == sala.time2 %}<span class="badge-open" style="margin-left:4px;">✓ Vencedor</span>
+                        {% elif vencedor == 'Empate' %}<span class="badge-open" style="margin-left:4px; background:#c9a227;">🤝 Empate</span>{% endif %}
                     </div>
                 </div>
             </div>
 
             <!-- Valor a receber -->
-            {% if vencedor %}
+            {% if vencedor == 'Empate' %}
+                {% if quantidade_apostas and quantidade_apostas > 0 %}
+                    {% set valor_por_apostador = (valor_total - taxa_administrativa) / quantidade_apostas %}
+                    <div style="background:#fff8dc; border-radius:10px; padding:20px; text-align:center; border:1px solid #c9a227;">
+                        <div style="font-size:0.9rem; color:#7a6000; margin-bottom:6px;">🤝 Cada apostador recebe de volta</div>
+                        <div style="font-size:2rem; font-weight:900; color:#7a6000;">R$ {{ '{:.2f}'.format(valor_por_apostador) }}</div>
+                        <div style="font-size:0.8rem; color:#7a6000; margin-top:6px; opacity:0.8;">
+                            (R$ {{ '{:.2f}'.format(valor_total) }} − R$ {{ '{:.2f}'.format(taxa_administrativa) }} de taxa) ÷ {{ quantidade_apostas }} apostadores
+                        </div>
+                    </div>
+                {% endif %}
+            {% elif vencedor %}
                 {% if vencedor == sala.time1 %}{% set qtd_vencedores = apostas_time1 %}{% else %}{% set qtd_vencedores = apostas_time2 %}{% endif %}
                 {% if qtd_vencedores and qtd_vencedores > 0 %}
                     {% set valor_a_receber = (valor_total - taxa_administrativa) / qtd_vencedores %}

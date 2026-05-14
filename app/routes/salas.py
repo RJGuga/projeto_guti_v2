@@ -3,7 +3,7 @@ from ..database import (
     insert_sala, get_sala_por_id, get_sala_detalhada_por_id,
     get_salas_criadas_por_usuario, encerrar_sala, iniciar_sala,
     get_quantidade_apostas_por_sala, get_quantidade_apostas_por_time,
-    get_usuario_por_id, get_apostadores_por_time, creditar_premio,
+    get_usuario_por_id, get_apostadores_por_time, get_todos_apostadores, creditar_premio,
     marcar_sala_paga, sala_ja_paga, salvar_vencedor
 )
 from ..decorators import login_required
@@ -110,9 +110,14 @@ def sala_status(id_sala):
 
     premio_por_vencedor = None
     if sala.get('vencedor'):
-        qtd_vencedores = get_quantidade_apostas_por_time(id_sala, sala['vencedor'])
-        if qtd_vencedores and qtd_vencedores > 0:
-            premio_por_vencedor = round(valor_liquido / qtd_vencedores, 2)
+        if sala['vencedor'] == 'Empate':
+            qtd_total = get_quantidade_apostas_por_sala(id_sala)
+            if qtd_total and qtd_total > 0:
+                premio_por_vencedor = round(valor_liquido / qtd_total, 2)
+        else:
+            qtd_vencedores = get_quantidade_apostas_por_time(id_sala, sala['vencedor'])
+            if qtd_vencedores and qtd_vencedores > 0:
+                premio_por_vencedor = round(valor_liquido / qtd_vencedores, 2)
 
     return jsonify({
         'encerrada': bool(sala['encerrada']),
@@ -144,11 +149,18 @@ def resultado(id_sala):
             taxa_administrativa = valor_total * 0.1
             valor_liquido = valor_total - taxa_administrativa
 
-            vencedores = get_apostadores_por_time(id_sala, vencedor)
-            if vencedores:
-                premio_por_usuario = valor_liquido / len(vencedores)
-                for id_usuario in vencedores:
-                    creditar_premio(id_usuario, id_sala, premio_por_usuario)
+            if vencedor == 'Empate':
+                apostadores = get_todos_apostadores(id_sala)
+                if apostadores:
+                    valor_por_apostador = valor_liquido / len(apostadores)
+                    for id_usuario in apostadores:
+                        creditar_premio(id_usuario, id_sala, valor_por_apostador)
+            else:
+                vencedores = get_apostadores_por_time(id_sala, vencedor)
+                if vencedores:
+                    premio_por_usuario = valor_liquido / len(vencedores)
+                    for id_usuario in vencedores:
+                        creditar_premio(id_usuario, id_sala, premio_por_usuario)
 
             salvar_vencedor(id_sala, vencedor)
             marcar_sala_paga(id_sala)

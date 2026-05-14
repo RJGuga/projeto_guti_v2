@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -30,7 +30,6 @@
             <a href="{{ url_for('carteira.carteira') }}" class="btn-qaq" style="color:#ffd700; font-weight:700;">💰 R$ {{ '%.2f'|format(saldo_carteira) }}</a>
         {% endif %}
         <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
-        <a href="{{ url_for('salas.salas_criadas') }}" class="btn-qaq">Minhas salas</a>
         <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
     </div>
 </nav>
@@ -60,7 +59,7 @@
                 </div>
             </div>
 
-            <p style="font-weight:600; margin-bottom:12px; color:#333;">Selecione o time vencedor:</p>
+            <p style="font-weight:600; margin-bottom:12px; color:#333;">Selecione o resultado:</p>
 
             <form action="{{ url_for('salas.resultado', id_sala=sala.id) }}" method="POST">
                 <div class="radio-time">
@@ -71,6 +70,12 @@
                     <label>
                         <input type="radio" name="time-selection" value="{{ sala.time2 }}" required>
                         {{ sala.time2 }}
+                    </label>
+                </div>
+                <div class="radio-time" style="margin-top:-8px;">
+                    <label style="border-color:#c9a227; background:rgba(201,162,39,0.07);">
+                        <input type="radio" name="time-selection" value="Empate" required>
+                        🤝 Empate
                     </label>
                 </div>
                 <button type="submit" class="btn-qaq solid" style="width:100%; padding:12px; font-size:1rem;">

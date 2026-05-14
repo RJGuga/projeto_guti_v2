@@ -237,6 +237,16 @@ def get_apostadores_por_time(id_sala, time):
     return [r['id_usuario'] for r in rows]
 
 
+def get_todos_apostadores(id_sala):
+    """Retorna lista de id_usuario de todos que apostaram na sala."""
+    conn = get_db_connection()
+    rows = conn.execute(
+        'SELECT id_usuario FROM apostas WHERE id_sala = ?', (id_sala,)
+    ).fetchall()
+    conn.close()
+    return [r['id_usuario'] for r in rows]
+
+
 def creditar_premio(id_usuario, id_sala, valor):
     """Credita o prêmio na carteira do usuário e registra em transacoes."""
     conn = get_db_connection()

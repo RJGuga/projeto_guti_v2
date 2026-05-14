@@ -39,7 +39,6 @@
             <a href="{{ url_for('carteira.carteira') }}" id="navbar-saldo" class="btn-qaq" style="color:#ffd700; font-weight:700;">💰 R$ {{ '%.2f'|format(saldo_carteira) }}</a>
         {% endif %}
         <a href="{{ url_for('main.home') }}" class="btn-qaq">Home</a>
-        <a href="{{ url_for('apostas.lista_apostas') }}" class="btn-qaq">Minhas apostas</a>
         <a href="{{ url_for('auth.sair') }}" class="btn-qaq danger">Sair</a>
     </div>
 </nav>
